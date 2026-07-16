@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="BundleTransfer — batch send native coin or ERC-20 to many wallets in one signature. Client-side only."
+    />
+    <meta name="color-scheme" content="dark light" />
+    <title>BundleTransfer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+  </head>
+  <body>
+    <!-- Opening intro — multi-phase, skippable -->
+    <div id="intro" aria-hidden="true">
+      <button type="button" id="introSkip" class="intro-skip">Skip</button>
+      <div class="intro-rings" aria-hidden="true">
+        <i></i><i></i><i></i><i></i>
+      </div>
+      <div class="intro-stage">
+        <div class="intro-glow" aria-hidden="true"></div>
+        <div class="intro-logo-wrap">
+          <div class="ms-mark intro-logo logo-disk">
+            <img src="/logo.png" alt="" width="180" height="180" draggable="false" />
+          </div>
+        </div>
+        <h1 class="intro-title" data-scramble-title>········</h1>
+        <p class="intro-sub" data-scramble-sub>························</p>
+        <div class="intro-bar" aria-hidden="true"><i></i></div>
+      </div>
+    </div>
+
+    <div id="app">
+      <header class="topbar">
+        <div class="brand">
+          <div class="logo logo-live" aria-hidden="true">
+            <div class="ms-mark header-logo logo-disk">
+              <img src="/logo.png" alt="BundleTransfer" width="56" height="56" draggable="false" />
+            </div>
+          </div>
+          <div class="brand-copy">
+            <strong id="brandTitle">BundleTransfer</strong>
+            <span id="brandTag">1-sig batch · EVM</span>
+          </div>
+        </div>
+
+        <div class="top-actions">
+          <button
+            type="button"
+            id="themeToggle"
+            class="btn btn-icon"
+            title="Toggle light / dark"
+            aria-label="Toggle light and dark theme"
+          >
+            <span class="icon-sun" aria-hidden="true"></span>
+            <span class="icon-moon" aria-hidden="true"></span>
+          </button>
+          <select id="chainSelect" class="select select-chain" title="Network"></select>
+          <button id="connectBtn" class="btn btn-primary" type="button">Connect Wallet</button>
+        </div>
+      </header>
+
+      <div class="wallet-strip" id="walletStrip" hidden>
+        <div>
+          <span class="label">Wallet</span>
+          <code id="walletAddress">—</code>
+        </div>
+        <div>
+          <span class="label">Network</span>
+          <span id="walletChain">—</span>
+        </div>
+        <div>
+          <span class="label">Balance</span>
+          <span id="walletBalance" class="mono">—</span>
+        </div>
+      </div>
+
+      <main class="layout">
+        <section class="panel compose">
+          <header class="panel-intro">
+            <div>
+              <h1>Send to many wallets</h1>
+              <p>
+                Pick asset · paste addresses · validate · <strong>sign once</strong>.
+                No custody.
+              </p>
+            </div>
+          </header>
+
+          <div class="compose-grid">
+            <div class="col">
+              <h2 class="sec">Asset</h2>
+              <div class="field">
+                <span class="label">Type</span>
+                <div class="seg" role="group" aria-label="Token mode">
+                  <button type="button" class="seg-btn active" id="modeNative">Native</button>
+                  <button type="button" class="seg-btn" id="modeErc20">ERC-20</button>
+                </div>
+              </div>
+
+              <div class="field" id="tokenField">
+                <span class="label">Search</span>
+                <div class="token-search-wrap">
+                  <input
+                    id="tokenSearch"
+                    class="input"
+                    type="search"
+                    spellcheck="false"
+                    placeholder="ETH, USDT, USDC…"
+                    autocomplete="off"
+                  />
+                  <div id="tokenResults" class="token-results" hidden></div>
+                </div>
+                <div id="selectedTokenChip" class="token-chip" hidden></div>
+                <span class="hint" id="tokenMeta">Trusted list · type ETH for native</span>
+                <details class="adv" id="advContract">
+                  <summary>Custom contract</summary>
+                  <p class="warn">Only paste addresses you verified.</p>
+                  <input
+                    id="tokenAddress"
+                    class="input mono"
+                    type="text"
+                    spellcheck="false"
+                    placeholder="0x…"
+                    autocomplete="off"
+                  />
+                </details>
+              </div>
+            </div>
+
+            <div class="col">
+              <h2 class="sec">Recipients</h2>
+              <div class="grid-2 tight">
+                <label class="field">
+                  <span class="label">Format</span>
+                  <select id="parseMode" class="select">
+                    <option value="equal_split" selected>Addresses only · same amount</option>
+                    <option value="addr_amount">Address + amount (CSV)</option>
+                  </select>
+                </label>
+                <label class="field" id="equalAmountField">
+                  <span class="label">Amount each</span>
+                  <input
+                    id="equalAmount"
+                    class="input mono"
+                    type="text"
+                    inputmode="decimal"
+                    placeholder="0.01"
+                  />
+                </label>
+              </div>
+              <label class="field grow">
+                <span class="label">Address list</span>
+                <textarea
+                  id="recipients"
+                  class="textarea mono"
+                  rows="7"
+                  spellcheck="false"
+                  placeholder="0xAbc…&#10;0xDef…&#10;0x789…"
+                ></textarea>
+                <span class="hint">One address / line · max 200</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button id="parseBtn" class="btn btn-secondary" type="button">Validate</button>
+            <button id="simulateBtn" class="btn btn-secondary" type="button" disabled>Est. gas</button>
+            <button id="sendBtn" class="btn btn-primary" type="button" disabled>Send · 1 signature</button>
+          </div>
+          <p class="batch-hint" id="batchHint">One popup · one fee · all recipients in one batch.</p>
+        </section>
+
+        <aside class="side">
+          <section class="panel preview">
+            <div class="panel-row">
+              <h2 class="sec">Preview</h2>
+              <span class="pill" id="previewCount">0 rows</span>
+            </div>
+            <div class="stats">
+              <div>
+                <span class="label">Valid</span>
+                <strong id="statValid" class="mono">0</strong>
+              </div>
+              <div>
+                <span class="label">Invalid</span>
+                <strong id="statInvalid" class="mono bad">0</strong>
+              </div>
+              <div class="wide">
+                <span class="label">Total</span>
+                <strong id="statTotal" class="mono accent">0</strong>
+              </div>
+              <div class="wide">
+                <span class="label">Est. gas</span>
+                <strong id="statGas" class="mono">—</strong>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="table" id="previewTable">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Address</th>
+                    <th>Amt</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="previewBody">
+                  <tr class="empty"><td colspan="4">Validate to populate</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="notes">
+            <h3>Notes</h3>
+            <ul>
+              <li>ETH · BSC · Polygon · Arb · Base · OP · AVAX · Robinhood</li>
+              <li>Native multi-send = one batch signature</li>
+              <li>Token search = trusted list only</li>
+              <li>Wrong chain/contract is irreversible</li>
+            </ul>
+          </section>
+
+          <section class="panel history-panel">
+            <div class="panel-row">
+              <h2 class="sec hist-title">Tx history</h2>
+              <button type="button" class="btn btn-ghost-xs" id="historyClear" title="Clear local history">Clear</button>
+            </div>
+            <div id="historyList" class="history-list">
+              <p class="history-empty muted">No batches yet · stored only in this browser</p>
+            </div>
+          </section>
+        </aside>
+      </main>
+    </div>
+
+    <div id="fx" hidden aria-hidden="true"><canvas id="fxCanvas"></canvas></div>
+
+    <div id="confirmModal" class="modal" hidden>
+      <div class="modal-backdrop" data-modal-close></div>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+        <h2 id="confirmTitle">Confirm send</h2>
+        <div id="confirmBody" class="modal-body"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="confirmCancel" data-modal-close>Cancel</button>
+          <button type="button" class="btn btn-primary" id="confirmOk">Sign batch</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
