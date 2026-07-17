@@ -68,13 +68,15 @@ export function scrambleText(el, finalText, { duration = 480, delay = 0, fps = 3
 export function enableHoverScramble(root = document.getElementById('app')) {
   if (!root || prefersReducedMotion()) return () => {};
 
+  // Text-only chrome. Never match bare <label> / containers that wrap inputs —
+  // scrambleText uses textContent and would destroy nested form controls
+  // (Amount each field was wiped on hover).
   const SELECTOR = [
     'h1',
     'h2',
     'h3',
     'strong',
-    'label',
-    '.label',
+    'span.label',
     '.sec',
     '.hint',
     '.batch-hint',
@@ -92,11 +94,30 @@ export function enableHoverScramble(root = document.getElementById('app')) {
     '.hist-meta',
   ].join(',');
 
+  const hasFormControl = (node) =>
+    !!node?.querySelector?.('input, textarea, select, button, option');
+
   const onEnter = (e) => {
-    const t = e.target.closest(SELECTOR);
+    const raw = e.target;
+    if (!raw || raw.nodeType !== 1) return;
+    // Never scramble while interacting with form controls
+    if (raw.closest('input, textarea, select, option, [contenteditable="true"]')) return;
+
+    const t = raw.closest(SELECTOR);
     if (!t || !root.contains(t)) return;
     if (t.closest('#intro')) return;
     if (t.matches('input, textarea, select, code, a')) return;
+    // Hard guard: any node that owns form children must never be textContent-scrambled
+    if (hasFormControl(t)) return;
+    if (t.childElementCount > 0 && !t.matches('button.btn, button.seg-btn, strong, .pill, .hist-meta')) {
+      // Prefer leaf text nodes; skip structural wrappers with mixed children
+      // (buttons/pills are OK — their text is the only content we animate)
+      const onlyTextish = [...t.childNodes].every(
+        (n) => n.nodeType === 3 || (n.nodeType === 1 && ['SPAN', 'B', 'I', 'EM', 'STRONG', 'SMALL'].includes(n.tagName))
+      );
+      if (!onlyTextish) return;
+    }
+
     const original = t.dataset.original || t.textContent;
     if (!original || !original.trim() || original.length > 90) return;
     if (t.dataset.scrambling === '1') return;

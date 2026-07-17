@@ -65,10 +65,19 @@ export const CHAINS = {
     explorer: 'https://robinhoodchain.blockscout.com',
     rpcHint: 'https://rpc.mainnet.chain.robinhood.com',
   },
+  // Monad L1 mainnet (EVM) — Multicall3 live @ 0xcA11…CA11; Disperse not deployed
+  143: {
+    chainId: 143,
+    hex: '0x8f',
+    name: 'Monad',
+    nativeSymbol: 'MON',
+    explorer: 'https://monadvision.com',
+    rpcHint: 'https://rpc.monad.xyz',
+  },
 };
 
 /** Default-first order in the network dropdown */
-export const CHAIN_ORDER = [1, 56, 137, 42161, 8453, 10, 43114, 4663];
+export const CHAIN_ORDER = [1, 56, 137, 42161, 8453, 10, 43114, 4663, 143];
 
 export function getChain(chainId) {
   return CHAINS[Number(chainId)] || null;

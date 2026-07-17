@@ -167,7 +167,19 @@ function wireEvents() {
   el.modeNative.addEventListener('click', () => setTokenMode('native'));
   el.modeErc20.addEventListener('click', () => setTokenMode('erc20'));
   el.parseMode.addEventListener('change', () => {
-    el.equalAmountField.hidden = el.parseMode.value !== 'equal_split';
+    const equal = el.parseMode.value === 'equal_split';
+    el.equalAmountField.hidden = !equal;
+    if (equal) {
+      // Ensure field is interactable after mode switch (never left disabled/hidden)
+      el.equalAmount.hidden = false;
+      el.equalAmount.removeAttribute('disabled');
+      el.equalAmount.removeAttribute('readonly');
+      // Focus amount when switching into equal-split so users can type immediately
+      queueMicrotask(() => el.equalAmount.focus());
+    }
+    clearPreviewActions();
+  });
+  el.equalAmount.addEventListener('input', () => {
     clearPreviewActions();
   });
   el.tokenAddress.addEventListener('change', () => onTokenChange({ fromAdvanced: true }));

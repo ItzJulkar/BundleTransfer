@@ -11,11 +11,15 @@ const { searchTrustedTokens, findTrustedByAddress, TRUSTED_TOKENS } = await impo
 const { CHAINS, CHAIN_ORDER } = await import(chainsUrl);
 
 describe('chains mainnet only', () => {
-  it('has no testnets and includes Robinhood', () => {
+  it('has no testnets and includes Robinhood + Monad', () => {
     assert.ok(CHAINS[4663], 'Robinhood Chain 4663');
     assert.equal(CHAINS[4663].name, 'Robinhood Chain');
+    assert.ok(CHAINS[143], 'Monad mainnet 143');
+    assert.equal(CHAINS[143].name, 'Monad');
+    assert.equal(CHAINS[143].nativeSymbol, 'MON');
     assert.ok(!CHAINS[11155111], 'Sepolia removed');
     assert.ok(!CHAINS[97], 'BSC testnet removed');
+    assert.ok(!CHAINS[10143], 'Monad testnet not included');
     for (const id of CHAIN_ORDER) {
       assert.ok(CHAINS[id], `chain ${id} in order`);
       assert.ok(!CHAINS[id].testnet, `${id} not testnet`);
@@ -68,5 +72,14 @@ describe('trusted token search', () => {
     const hits = searchTrustedTokens(4663, 'eth', { nativeSymbol: 'ETH' });
     assert.equal(hits.length, 1);
     assert.equal(hits[0].kind, 'native');
+  });
+
+  it('Monad: native MON + curated WMON/USDC', () => {
+    const mon = searchTrustedTokens(143, 'mon', { nativeSymbol: 'MON' });
+    assert.ok(mon.some((h) => h.kind === 'native' && h.symbol === 'MON'));
+    const usdc = searchTrustedTokens(143, 'usdc', { nativeSymbol: 'MON' });
+    assert.ok(usdc.some((h) => h.symbol === 'USDC' && h.kind === 'erc20'));
+    const wmon = searchTrustedTokens(143, 'wmon', { nativeSymbol: 'MON' });
+    assert.ok(wmon.some((h) => h.symbol === 'WMON'));
   });
 });

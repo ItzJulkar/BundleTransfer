@@ -94,6 +94,21 @@ export const TRUSTED_TOKENS = {
   // Name search returns nothing until tokens are verified & added here.
   // Custom contract paste still allowed with explicit warning.
   4663: [],
+  // Monad mainnet — curated only (verified on-chain via public RPC)
+  143: [
+    {
+      symbol: 'WMON',
+      name: 'Wrapped MON',
+      address: '0x3bd359C1119dA7Da1D913D1C4D2B7c461115433A',
+      decimals: 18,
+    },
+    {
+      symbol: 'USDC',
+      name: 'USD Coin',
+      address: '0x754704Bc059F8C67012fEd69BC8A327a5aafb603',
+      decimals: 6,
+    },
+  ],
 };
 
 /**
@@ -112,6 +127,7 @@ export function matchesNativeQuery(query, nativeSymbol) {
   if (sym === 'bnb' && ['bnb', 'binance'].some((a) => a.startsWith(q) || q.startsWith(a))) return true;
   if ((sym === 'pol' || sym === 'matic') && ['pol', 'matic', 'polygon'].some((a) => a.startsWith(q) || q.startsWith(a))) return true;
   if (sym === 'avax' && ['avax', 'avalanche'].some((a) => a.startsWith(q) || q.startsWith(a))) return true;
+  if (sym === 'mon' && ['mon', 'monad'].some((a) => a.startsWith(q) || q.startsWith(a))) return true;
   return false;
 }
 
