@@ -187,11 +187,39 @@ body {
   justify-content: flex-end;
 }
 
+.social-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+a.social-btn {
+  color: var(--dim);
+  text-decoration: none;
+}
+
+a.social-btn:hover {
+  color: var(--text);
+  text-decoration: none;
+}
+
+a.social-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus, 0 0 0 2px var(--bg), 0 0 0 4px var(--accent-border));
+}
+
+.i-social {
+  width: 15px;
+  height: 15px;
+  display: block;
+}
+
 .select-chain {
   min-width: 168px;
 }
 
-/* Theme toggle */
+/* Theme toggle + social icon buttons */
 .btn-icon {
   width: 40px;
   height: 40px;

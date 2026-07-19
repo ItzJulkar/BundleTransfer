@@ -4,6 +4,9 @@ Batch-send **native coins or ERC-20 tokens** from your browser wallet to **many 
 
 **Live:** https://bundletransfer.vercel.app
 
+- X: https://x.com/Web3Julkar
+- GitHub: https://github.com/ItzJulkar
+
 ## Features
 
 - **Client-side only** — keys stay in MetaMask / Rabby / your wallet
