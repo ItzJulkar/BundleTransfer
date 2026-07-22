@@ -12,7 +12,6 @@ import {
   Contract,
   parseUnits,
   formatUnits,
-  MaxUint256,
   getCreate2Address,
   keccak256,
   zeroPadValue,
@@ -329,10 +328,11 @@ async function ensureErc20Allowance({ signer, tokenAddress, spender, amount, onS
   const token = new Contract(tokenAddress, ERC20_ABI, signer);
   const owner = await signer.getAddress();
   const current = await token.allowance(owner, spender);
+  // Exact batch total only — never infinite MaxUint256 approve
   if (current >= amount) return null;
-  onStatus?.('Approve token once for batch…');
+  onStatus?.('Approve exact batch amount…');
   const o = await txOverrides(signer.provider);
-  const tx = await token.approve(spender, MaxUint256, o);
+  const tx = await token.approve(spender, amount, o);
   await tx.wait(1);
   return tx.hash;
 }
